@@ -56,7 +56,7 @@ for i in range(lib.COUNT_NUMB):
     print(f"Новый бочонок: {temp_numb} (осталось {count_in_basket})")
 
     for temp_player in players:
-        temp_player.my_card.print_card()
+        print("\n".join(temp_player.my_card.print_card()))
 
     for temp_player in players:
         if not temp_player.is_computer:     # Если игрок человек, то спаршиваем его

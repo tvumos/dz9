@@ -4,17 +4,13 @@ COUNT_NUMB = 90
 
 class NumbSequence:
 
-    def __init__(self):
+    def __init__(self, size):
         """
-        Инициализация корзины
+            Инициализация корзины, заполнение корзины цифрами от 1 до size + 1
+            :param size: Размер корзины с номерами лото
         """
-        self.list_numbers = []
-
-    def create(self, size):
-        """
-        Создание корзины, заполнение корзины цифрами от 1 до size + 1
-        :param size: Размер корзины с номерами лото
-        """
+        if size <= 0:
+            raise ValueError()
         self.list_numbers = list(range(1, size + 1))
 
     def next(self):
@@ -35,8 +31,7 @@ class Basket(NumbSequence):
         """
         Инициализация корзины
         """
-        super().__init__()
-        self.create(COUNT_NUMB)     # Размер корзины = 90 бочёнков
+        super().__init__(COUNT_NUMB)
         self.in_basket = COUNT_NUMB
 
     def next(self):
@@ -44,33 +39,10 @@ class Basket(NumbSequence):
         return super(Basket, self).next()
 
 
-
-def insert_numb_in_list(list, insert_numb):
-    list_digit = [int(x) if x != '  ' else 0 for x in list]
-    yes_insert = False
-    inserted_numb = False
-    for i, numb in enumerate(list_digit):
-        if numb < insert_numb and insert_numb - numb <= 10:
-            yes_insert = True
-        if yes_insert and numb == 0:    # Можно вставлять число
-            list[i] = '{:>2}'.format(insert_numb)
-            inserted_numb = True
-            break
-
-    if not inserted_numb:
-        yes_insert = False
-        list_reverse = reversed(list_digit)
-        for i, numb in enumerate(list_reverse):  # Идем в обратную сторону
-            if numb < insert_numb and insert_numb - numb <= 10:
-                yes_insert = True
-            if yes_insert and numb == 0:  # Можно вставлять число
-                list[8 - i] = '{:>2}'.format(insert_numb)
-                inserted_numb = True
-                break
-    return list
-
-
 class LottoCard:
+
+    COUNT_NUMB_IN_CARD = 15
+    COUNT_NUMB_IN_LINE = 5
 
     def __init__(self):
         """
@@ -80,65 +52,52 @@ class LottoCard:
         В каждой карточке 3 строки
         """
         self.player_name = ""
-        self.current_count_numbers = 15
-        self.card = [['  '] * 9 for i in range(3)]
-        self.list_count = []
-        self.card_list = []
-        self.add_list = []
+        self.current_count_numbers = self.COUNT_NUMB_IN_CARD
+        self.card = [[0] * 9 for i in range(3)]
 
-    def create_card(self, name, size):
+    def create_card(self, name):
         self.player_name = name
         card_set = set()
-        while len(card_set) < 15:
-            card_set.add(random.randint(1, size))
-        self.card_list = list(card_set)
-        self.card_list.sort()
-        #self.card_list = [8, 11, 12, 15, 16, 33, 54, 57, 68, 70, 80, 83, 86, 88, 90]
+        while len(card_set) < self.COUNT_NUMB_IN_CARD:
+            card_set.add(random.randint(1, COUNT_NUMB))
+        card_int = list(card_set)
+        #self.card_int = [65, 67, 68, 3, 72, 41, 42, 74, 12, 13, 79, 48, 19, 25, 90]
+        #print(self.card_int)
 
-        self.list_count = []
-        for i in range(9):
-            self.list_count.append(len(list([x for x in self.card_list if i * 10 < x <= 10 + i * 10])))
+        for line in range(3):
+            seq = NumbSequence(5)
+            temp_line_list = []
+            for col in range(5):
+                numb = seq.next()
+                next_numb = card_int[numb - 1]
+                temp_line_list.append(next_numb)
 
-        for i, count in enumerate(self.list_count):
-            if count == 3:
-                for j, numb in enumerate(list([x for x in self.card_list if i * 10 < x <= 10 + i * 10])):
-                    self.card[j][i] = '{:>2}'.format(numb)
-            elif 0 < count < 3:
-                seq = NumbSequence()
-                seq.create(3)
-                for j, numb in enumerate(list([x for x in self.card_list if i * 10 < x <= 10 + i * 10])):
-                    row = seq.next()
-                    while len(list([x for x in self.card[row - 1] if x != '  '])) >= 5:
-                        row = seq.next()
-                    self.card[row - 1][i] = '{:>2}'.format(numb)
-            elif count > 3:
-                seq = NumbSequence()
-                seq.create(3)
-                for j, numb in enumerate(list([x for x in self.card_list if i * 10 < x <= 10 + i * 10])):
-                    row = seq.next()
-                    if j <= 2:
-                        self.card[j][i] = '{:>2}'.format(numb)
-                    else:
-                        self.add_list.append(numb)
+            for ind in range(5):    # Удаляем 5 элементов извлеченных из массива
+                card_int.remove(temp_line_list[ind - 1])
+            temp_line_list.sort()   # Сортируем список
 
-        for numb in self.add_list:     # Цикл по всем не распределенным числам
-            seq = NumbSequence()        # Создаём случайную последовательность из 3 элементов
-            seq.create(3)
-            for ind in range(3):        # Цикл по всем строкам карточки
-                row = seq.next()        # Получаем случайный индекс
-                if len(list([x for x in self.card[row - 1] if x != '  '])) < 5:    # Проверяем в строке чисел меньше 5
-                    self.card[row - 1] = insert_numb_in_list(self.card[row - 1], numb)
+            for i, x in enumerate(range(1, 5)):
+                if i == 4:
                     break
+                numb = random.randint(1, len(temp_line_list))
+                if 1 < numb <= len(temp_line_list):
+                    temp_line_list.insert(numb - 1, 0)
+                elif 1 == numb:
+                    temp_line_list.insert(1, 0)
+                elif numb >= len(temp_line_list):
+                    temp_line_list.insert(len(temp_line_list) - 1, 0)
+
+            self.card[line] = temp_line_list
 
     def find_number(self, number):
-        return True in [True if '{:>2}'.format(number) in row else False for row in self.card]
+        return True in [True if number in row else False for row in self.card]
 
     def number_cross_out(self, number):
         result = False
         for i, row in enumerate(self.card):
-            if '{:>2}'.format(number) in row:
-                pos = row.index('{:>2}'.format(number))
-                self.card[i][pos] = '--'
+            if number in row:
+                pos = row.index(number)
+                self.card[i][pos] = -1      # Если мы вычеркиваем цифру из карточки, то значение меняем на -1
                 self.current_count_numbers -= 1
                 result = True
                 break
@@ -148,11 +107,16 @@ class LottoCard:
         frame_char = 26
         numb_char = int((frame_char - len(self.player_name)) / 2) if frame_char - len(self.player_name) > 4 else 2
         header = f'{numb_char * "="} {self.player_name} {numb_char * "="}'
-        print(header)
-        print(f'{" ".join(self.card[0])}')
-        print(f'{" ".join(self.card[1])}')
-        print(f'{" ".join(self.card[2])}')
-        print(f'{len(header) * "="}')
+        result = []
+        result.append(header)
+        result.append(" ".join(list(['{:>2}'.format(x) if len(str(x)) == 1 else str(x) for x in self.card[0]])).
+              replace(" 0", "  ").replace("-1", "--"))
+        result.append(" ".join(list(['{:>2}'.format(x) if len(str(x)) == 1 else str(x) for x in self.card[1]])).
+                      replace(" 0", "  ").replace("-1", "--"))
+        result.append(" ".join(list(['{:>2}'.format(x) if len(str(x)) == 1 else str(x) for x in self.card[2]])).
+                      replace(" 0", "  ").replace("-1", "--"))
+        result.append(f'{len(header) * "="}')
+        return result
 
 
 class Player:
@@ -164,7 +128,7 @@ class Player:
         self.name = ""
 
     def create_game_card(self, name_player, is_comp):
-        self.my_card.create_card(name_player, 90)
+        self.my_card.create_card(name_player)
         self.is_computer = is_comp
         self.name = name_player
 
@@ -191,23 +155,18 @@ class Player:
 
 
 
-if __name__ == '__main__':
-    # Создание игровой карточки
-    player1 = Player()
-    player1.create_game_card("Иванов", False)
-    player1.my_card.print_card()
-    print("current_count_numbers =", player1.my_card.current_count_numbers, ", lost = ", player1.lost,
-          ", is_computer = ", player1.is_computer)
-    print("check_number 33 = ", player1.check_number(33))
-    print("current_count_numbers =", player1.my_card.current_count_numbers, ", lost = ", player1.lost,
-          ", is_computer = ", player1.is_computer)
-    print("check_number 33 = ", player1.examination_number(33))
-    print("current_count_numbers =", player1.my_card.current_count_numbers, ", lost = ", player1.lost,
-          ", is_computer = ", player1.is_computer)
-    print("check_number 33 = ", player1.examination_number(71))
-    print("current_count_numbers =", player1.my_card.current_count_numbers, ", lost = ", player1.lost,
-          ", is_computer = ", player1.is_computer)
-    player1.my_card.print_card()
+# if __name__ == '__main__':
+#
+#     player = Player()
+#     player.create_game_card("Владимир", False)
+#     print("\n".join(player.my_card.print_card()))
+#     print("check_number(10) = ", player.check_number(10))
+#     print("my_card.find_number(10) = ", player.my_card.find_number(10))
+#     print("examination_number(10) = ", player.examination_number(10))
+#     print("\n".join(player.my_card.print_card()))
+#     print("lost = ", player.lost)
+
+
 
 
 
