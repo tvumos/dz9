@@ -1,8 +1,43 @@
 import pytest
-from lib import NumbSequence, Basket, Player, LottoCard
+from lib import NumbSequence, Basket, Player, LottoCard, BasketIterator, RandomIterator
 import random
+# pip install pytest-cov
 # pytest --cov
 # pytest --cov-report=html
+
+class TestRandomIterator:
+    LEN_10 = 10
+
+    def setup(self):
+        self.numbers = RandomIterator(self.LEN_10)
+
+    def teardown(self):
+        pass
+
+    def test_init(self):
+        assert len(self.numbers.list_numbers) == self.LEN_10
+
+    def test_next(self):
+        for numb in self.numbers:
+            assert 1 <= numb <= self.LEN_10
+
+
+class TestBasketIterator:
+    LEN_90 = 90
+
+    def setup(self):
+        self.numbers = BasketIterator(self.LEN_90)
+
+    def teardown(self):
+        pass
+
+    def test_init(self):
+        assert len(self.numbers.list_numbers) == self.LEN_90
+
+    def test_next(self):
+        for numb in self.numbers:
+            assert 1 <= numb <= self.LEN_90
+
 
 class TestNumbSequence:
     LEN_20 = 20

@@ -2,6 +2,45 @@ import random
 
 COUNT_NUMB = 90
 
+class RandomIterator:
+
+    def __init__(self, limit):
+        self.list_numbers = list(range(1, limit + 1))
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if len(self.list_numbers) >= 1:
+            next_numb = self.list_numbers[random.randint(1, len(self.list_numbers)) - 1]
+            self.list_numbers.remove(next_numb)
+            return next_numb
+        else:
+            raise StopIteration
+
+
+class BasketIterator:
+
+    def __iter__(self):
+        return self
+
+    def __init__(self, limit):
+        """
+        Инициализация корзины
+        """
+        self.in_basket = COUNT_NUMB
+        self.list_numbers = list(range(1, COUNT_NUMB + 1))
+
+    def __next__(self):
+        if len(self.list_numbers) >= 1:
+            next_numb = self.list_numbers[random.randint(1, len(self.list_numbers)) - 1]
+            self.list_numbers.remove(next_numb)
+            self.in_basket -= 1
+            return next_numb
+        else:
+            raise StopIteration
+
+
 class NumbSequence:
 
     def __init__(self, size):
@@ -65,10 +104,8 @@ class LottoCard:
         #print(self.card_int)
 
         for line in range(3):
-            seq = NumbSequence(5)
             temp_line_list = []
-            for col in range(5):
-                numb = seq.next()
+            for numb in RandomIterator(5):
                 next_numb = card_int[numb - 1]
                 temp_line_list.append(next_numb)
 
@@ -118,6 +155,18 @@ class LottoCard:
         result.append(f'{len(header) * "="}')
         return result
 
+    def __str__(self):
+        """
+        Приведение объекта игровая карточка с строке
+        """
+        return "\n".join(self.print_card())
+
+    def __eq__(self, other):
+        """
+            сравнение объектов
+        """
+        return self.card[0] == other.card[0] and self.card[1] == other.card[1] and self.card[2] == other.card[2] and self.player_name == other.player_name
+
 
 class Player:
 
@@ -157,14 +206,37 @@ class Player:
 
 # if __name__ == '__main__':
 #
-#     player = Player()
-#     player.create_game_card("Владимир", False)
-#     print("\n".join(player.my_card.print_card()))
-#     print("check_number(10) = ", player.check_number(10))
-#     print("my_card.find_number(10) = ", player.my_card.find_number(10))
-#     print("examination_number(10) = ", player.examination_number(10))
-#     print("\n".join(player.my_card.print_card()))
-#     print("lost = ", player.lost)
+#     numbers = BasketIterator(90)
+#     for i in numbers:
+#         print(i)
+
+    # player1 = Player()
+    # player1.create_game_card("Владимир", False)
+    # print(player1.my_card.card[0])
+    #
+    # player2 = Player()
+    # player2.create_game_card("Владимир", False)
+    # print(player2.my_card.card[0])
+    #
+    #
+    # player3 = player2
+    # player3.my_card.player_name = "Сергей"
+    #
+    # print(player2.my_card)
+    # print(player3.my_card)
+    #
+    # if player2 == player3:
+    #     print("Равны: player3 == player2")
+    # else:
+    #     print("Не равны: player3 != player2")
+
+    # print("\n".join(player.my_card.print_card()))
+    # print("check_number(10) = ", player.check_number(10))
+    # print("my_card.find_number(10) = ", player.my_card.find_number(10))
+    # print("examination_number(10) = ", player.examination_number(10))
+    # print("\n".join(player.my_card.print_card()))
+    # print(str(player.my_card))
+    # print("lost = ", player.lost)
 
 
 

@@ -32,12 +32,11 @@ else:
     exit(0)
 
 # Список игроков заполнен, начинаем игру
-basket = lib.Basket()
 count_in_basket = lib.COUNT_NUMB
 print()
 print("=" * 50)
 print("Начинаем игру")
-for i in range(lib.COUNT_NUMB):
+for temp_numb in lib.BasketIterator(lib.COUNT_NUMB):
     # Выбираем всех игроков у которых не осталось номеров в карточках
     winners = list([x for x in players_list if x.my_card.current_count_numbers == 0])
     if len(winners) > 0:    # Есть победитель
@@ -51,7 +50,6 @@ for i in range(lib.COUNT_NUMB):
         print(f"Игра завершается. Остался один игрок. Победил {players[0].name}")
         exit(0)
 
-    temp_numb = basket.next()
     count_in_basket -= 1
     print(f"Новый бочонок: {temp_numb} (осталось {count_in_basket})")
 
